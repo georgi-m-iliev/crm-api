@@ -1,1 +1,1 @@
-# crm-api
+# AppointMate - REST API
