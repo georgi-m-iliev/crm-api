@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.internal import admin
-from app.routers import auth, users
+from app.routers import auth, users, account, appointments
 from app.models import Base
 from app.database import engine, SessionLocal, Base
 
@@ -19,6 +19,8 @@ def get_application() -> FastAPI:
     # Mapping api routes
     application.include_router(auth.auth, prefix="/auth", tags=["auth"])
     application.include_router(users.users, prefix="/users", tags=["users"])
+    application.include_router(account.account, prefix="/account", tags=["account"])
+    application.include_router(appointments.appointments, prefix="/appointments", tags=["appointments"])
 
     # Add exception handlers
     # application.add_exception_handler(HTTPException, http_error_handler)
