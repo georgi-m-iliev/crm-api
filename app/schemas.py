@@ -1,5 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
-from sqlalchemy import UUID
+from pydantic import BaseModel, EmailStr
 
 
 class AccountBase(BaseModel):
@@ -30,12 +29,6 @@ class UserCreate(UserBase):
 class User(UserBase):
     uuid: str
     is_active: bool
-
-    @field_validator("uuid")
-    def convert_uuid(cls, value, values):
-        if isinstance(value, UUID):
-            return str(value)
-        return value
 
     class Config:
         from_attributes = True
