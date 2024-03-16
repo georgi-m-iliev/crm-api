@@ -18,5 +18,8 @@ def create_appointment(appointment: schemas.AppointmentCreate, db: Session = Dep
 
 
 @appointments.get('/get', response_model=list[schemas.Appointment])
-def get_appointments_between(appointments_request: schemas.AppointmentsBetweenRequest, db: Session = Depends(get_db)):
+def get_appointments_between(
+    appointments_request: schemas.AppointmentsBetweenRequest = Depends(),
+    db: Session = Depends(get_db)
+):
     return crud.get_appointments_between(db, appointments_request)
