@@ -56,6 +56,5 @@ class Appointment(Base):
     confirmed = Column(Boolean, default=False)
 
     client = relationship("Client", backref="clients")
-    service = relationship("Service", backref="services")
     service = relationship("Service", backref="services.uuid")
 
