@@ -51,16 +51,16 @@ def get_client(db: Session, name: str, phone: str):
     db.commit()
     db.refresh(client)
 
-    twilio = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+    twilio_client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
     try:
-        message = twilio.messages.create(
+        message = twilio_client.messages.create(
             from_='+18582520393',
             to=client.phone,
             body=f'Your OTP code for AppointMate is {client.otp_code}'
         )
         print(message.sid)
-    except twilio.base.exceptions.TwilioRestException:
-        print('Error sending OTP code')
+    except twilio.base.exceptions.TwilioRestException as ex:
+        print('Error sending OTP code: ', ex.msg)
 
     return client
 
