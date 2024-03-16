@@ -45,3 +45,17 @@ def get_client(db: Session, name: str, phone: str):
         db.commit()
         db.refresh(client)
     return client
+
+
+def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate):
+    appointment = models.Appointment(**appointment_data.dict())
+    db.add(appointment)
+    db.commit()
+    db.refresh(appointment)
+    return appointment
+
+
+def get_appointments_between(db: Session, appointments_request: schemas.AppointmentsBetweenRequest):
+    return db.query(models.Appointment).filter(
+        models.Appointment.date.between(appointments_request.start_date, appointments_request.end_date)
+    ).all()
