@@ -76,7 +76,7 @@ def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate)
     return appointment
 
 
-def get_appointments_between(db: Session, appointments_request: schemas.AppointmentsBetweenRequest):
-    return db.query(models.Appointment).filter(
+def get_appointments_between(db: Session, account_uuid: str, appointments_request: schemas.AppointmentsBetweenRequest):
+    return [item for item in db.query(models.Appointment).filter(
         models.Appointment.date.between(appointments_request.start_date, appointments_request.end_date)
-    ).all()
+    ).all() if item.service.account_uuid == account_uuid]
