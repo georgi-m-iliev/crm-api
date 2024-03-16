@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.internal import admin
 from app.routers import auth, users, account, appointments
 from app.models import Base
 from app.database import engine, SessionLocal, Base
