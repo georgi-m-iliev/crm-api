@@ -35,3 +35,13 @@ def create_service(db: Session, service_data: schemas.ServiceCreate, account_uui
 
 def get_all_appointments_between(db: Session, start: datetime.datetime, end: datetime.datetime):
     return db.query(models.Appointment).filter(models.Appointment.date.between(start, end)).all()
+
+
+def get_client(db: Session, name: str, phone: str):
+    client = db.query(models.Client).filter(models.Client.name == name, models.Client.phone == phone).first()
+    if client is None:
+        client = models.Client(name=name, phone=phone)
+        db.add(client)
+        db.commit()
+        db.refresh(client)
+    return client
