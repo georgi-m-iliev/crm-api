@@ -69,3 +69,9 @@ async def get_current_active_user(current_user: Annotated[User, Depends(get_curr
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+async def get_user_and_check_account(current_user: Annotated[User, Depends(get_current_user)], account_uuid: str):
+    if current_user.account_uuid != account_uuid:
+        raise HTTPException(status_code=403, detail="You cannot access this resource!")
+    return current_user

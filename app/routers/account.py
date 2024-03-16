@@ -3,28 +3,41 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.dependencies import get_db
+from app.auth import get_user_and_check_account
 
 account = APIRouter()
 
 
 @account.get("/{account_uuid}", response_model=schemas.Account)
-async def read_account(account_uuid: str, db: Session = Depends(get_db)):
+async def read_account(
+    account_uuid: str,
+    db: Session = Depends(get_db)
+):
     return crud.get_account_by_uuid(db, account_uuid)
 
 
-@account.get("/{account_uuid}/services", response_model=list[schemas.Service])
-async def read_services(account_uuid: str, db: Session = Depends(get_db)):
+@account.get("/{account_uuid}/services", response_model=list[schemas.Service], )
+async def read_services(
+    account_uuid: str,
+    db: Session = Depends(get_db)
+):
     return crud.get_services_by_account_uuid(db, account_uuid)
 
 
 @account.post("/{account_uuid}/services/add", response_model=schemas.Service)
-async def create_service(account_uuid: str, service: schemas.ServiceCreate, db: Session = Depends(get_db)):
+async def create_service(
+    account_uuid: str,
+    service: schemas.ServiceCreate,
+    user: models.User = Depends(get_user_and_check_account),
+    db: Session = Depends(get_db)
+):
     return crud.create_service(db, service, account_uuid)
 
 
 @account.get("/{account_uuid}/availability")
 async def get_availability(
-    account_uuid: str, availability_request: schemas.AvailabilityRequest,
+    account_uuid: str,
+    availability_request: schemas.AvailabilityRequest,
     db: Session = Depends(get_db)
 ):
 
