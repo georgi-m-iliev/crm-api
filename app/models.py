@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func, UUID, DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func, DateTime, Time
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -33,6 +33,7 @@ class Client(Base):
     uuid = Column(String, primary_key=True, server_default=func.gen_random_uuid())
     name = Column(String, nullable=False)
     phone = Column(String, nullable=False)
+    otp_code = Column(String(5), nullable=False)
 
 
 class Service(Base):
@@ -52,6 +53,9 @@ class Appointment(Base):
     date = Column(DateTime(timezone=True), nullable=False)
     client_uuid = Column(String, ForeignKey("clients.uuid"))
     service_uuid = Column(String, ForeignKey("services.uuid"))
+    confirmed = Column(Boolean, default=False)
 
     client = relationship("Client", backref="clients")
     service = relationship("Service", backref="services")
+    service = relationship("Service", backref="services.uuid")
+

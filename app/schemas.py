@@ -76,12 +76,15 @@ class AppointmentBase(BaseModel):
 class AppointmentCreate(AppointmentBase):
     client_uuid: str
     service_uuid: str
+    otp_code: str
 
 
 class Appointment(AppointmentBase):
     uuid: str
+    confirmed: bool
     client: Client
     service: Service
+
 
     class Config:
         from_attributes = True
@@ -96,3 +99,5 @@ class AvailabilityRequest(BaseModel):
 class AppointmentsBetweenRequest(BaseModel):
     start_date: datetime.datetime
     end_date: datetime.datetime
+
+

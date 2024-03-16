@@ -1,6 +1,8 @@
 import datetime
+import random
 
 from sqlalchemy.orm import Session
+from twilio.rest import Client
 
 from app import models, schemas
 
@@ -42,13 +44,26 @@ def get_client(db: Session, name: str, phone: str):
     if client is None:
         client = models.Client(name=name, phone=phone)
         db.add(client)
-        db.commit()
-        db.refresh(client)
+
+    client.otp_code = str(random.randint(10000, 99999))
+    db.commit()
+    db.refresh(client)
+
+    twilio = Client(account_sid, auth_token)
+    message = twilio.messages.create(
+        from_='+15017122661',
+        to=client.phone,
+        body=f'Your OTP code for AppointMate is {client.otp_code}'
+    )
+    print(message.sid)
+
     return client
 
 
 def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate):
     appointment = models.Appointment(**appointment_data.dict())
+    if appointment.client.otp_code != appointment_data.otp_code:
+        raise ValueError('Invalid OTP code')
     db.add(appointment)
     db.commit()
     db.refresh(appointment)
