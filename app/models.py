@@ -53,7 +53,6 @@ class Appointment(Base):
     date = Column(DateTime(timezone=True), nullable=False)
     client_uuid = Column(String, ForeignKey("clients.uuid"))
     service_uuid = Column(String, ForeignKey("services.uuid"))
-    confirmed = Column(Boolean, default=False)
 
     client = relationship("Client", backref="clients")
     service = relationship("Service", backref="services.uuid")

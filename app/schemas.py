@@ -31,6 +31,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     uuid: str
     is_active: bool
+    account_uuid: str
 
     class Config:
         from_attributes = True
@@ -81,10 +82,8 @@ class AppointmentCreate(AppointmentBase):
 
 class Appointment(AppointmentBase):
     uuid: str
-    confirmed: bool
     client: Client
     service: Service
-
 
     class Config:
         from_attributes = True
@@ -99,5 +98,3 @@ class AvailabilityRequest(BaseModel):
 class AppointmentsBetweenRequest(BaseModel):
     start_date: datetime.datetime
     end_date: datetime.datetime
-
-
