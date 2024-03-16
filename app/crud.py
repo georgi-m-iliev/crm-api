@@ -3,6 +3,7 @@ import random
 
 from sqlalchemy.orm import Session
 from twilio.rest import Client
+import twilio.base.exceptions
 from app.config import settings
 
 from app import models, schemas
@@ -51,12 +52,15 @@ def get_client(db: Session, name: str, phone: str):
     db.refresh(client)
 
     twilio = Client(settings.twilio_account_sid, settings.twilio_auth_token)
-    message = twilio.messages.create(
-        from_='+15017122661',
-        to=client.phone,
-        body=f'Your OTP code for AppointMate is {client.otp_code}'
-    )
-    print(message.sid)
+    try:
+        message = twilio.messages.create(
+            from_='+18582520393',
+            to=client.phone,
+            body=f'Your OTP code for AppointMate is {client.otp_code}'
+        )
+        print(message.sid)
+    except twilio.base.exceptions.TwilioRestException:
+        print('Error sending OTP code')
 
     return client
 
