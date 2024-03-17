@@ -3,6 +3,7 @@ import random
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from twilio.rest import Client
 import twilio.base.exceptions
 from app.config import settings
@@ -39,16 +40,33 @@ def update_services(db: Session, update: schemas.ServicesUpdate, account_uuid: s
     # we need to remove the services that are not in the update list and add the new ones
     existing_services = db.query(models.Service).filter(models.Service.account_uuid == account_uuid).all()
     existing_services_uuids = [service.uuid for service in existing_services]
+    print('existing', existing_services_uuids)
     keep_services_uuids = [service.uuid for service in update.services if service.uuid is not None]
-    new_services = [service for service in update.services if service.uuid is None]
-    for service in new_services:
-        db.add(models.Service(**service.dict(), account_uuid=account_uuid))
-    db.commit()
+    print('keep', keep_services_uuids)
+    new_services = [service for service in update.services if not service.uuid]
+    for new_service in new_services:
+        del new_service.uuid
+
+    try:
+        for service in new_services:
+            db.add(models.Service(**service.dict(), account_uuid=account_uuid))
+        db.commit()
+    except IntegrityError:
+        return HTTPException(status_code=400, detail='Service name already exists')
+
     to_delete_uuids = [uuid for uuid in existing_services_uuids if uuid not in keep_services_uuids]
     for uuid in to_delete_uuids:
         db.query(models.Appointment).filter(models.Appointment.service_uuid == uuid).delete()
         db.query(models.Service).filter(models.Service.uuid == uuid).delete()
     db.commit()
+
+    # update keep_services with new data
+    for updated_service in update.services:
+        if 'uuid' in updated_service.model_dump(
+                exclude_unset=True).keys() and updated_service.uuid in keep_services_uuids:
+            db.query(models.Service).filter(models.Service.uuid == updated_service.uuid).update(updated_service.dict())
+
+    return get_services_by_account_uuid(db, account_uuid)
 
 
 def get_all_appointments_between(db: Session, start: datetime.datetime, end: datetime.datetime, account_uuid: str):

@@ -105,9 +105,5 @@ class AppointmentsBetweenRequest(BaseModel):
     end_date: datetime.datetime
 
 
-class ServiceUpdate(ServiceBase):
-    uuid: str
-
-
 class ServicesUpdate(BaseModel):
-    services: List[ServiceUpdate]
+    services: List[Service]
