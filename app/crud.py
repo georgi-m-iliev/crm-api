@@ -26,6 +26,10 @@ def get_account_by_uuid(db: Session, uuid: str):
     return db.query(models.Account).filter(models.Account.uuid == uuid).first()
 
 
+def get_service_by_uuid(db: Session, uuid: str):
+    return db.query(models.Service).filter(models.Service.uuid == uuid).first()
+
+
 def get_services_by_account_uuid(db: Session, account_uuid: str):
     return db.query(models.Account).filter(models.Account.uuid == account_uuid).first().services
 
@@ -47,8 +51,10 @@ def update_services(db: Session, update: schemas.ServicesUpdate, account_uuid: s
     db.commit()
 
 
-def get_all_appointments_between(db: Session, start: datetime.datetime, end: datetime.datetime):
-    return db.query(models.Appointment).filter(models.Appointment.date.between(start, end)).all()
+def get_all_appointments_between(db: Session, start: datetime.datetime, end: datetime.datetime, account_uuid: str):
+    return [appointment for appointment in db.query(models.Appointment).filter(
+        models.Appointment.date.between(start, end)
+    ).all() if appointment.service.account_uuid == account_uuid]
 
 
 def get_client(db: Session, name: str, phone: str):

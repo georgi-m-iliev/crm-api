@@ -41,30 +41,34 @@ async def create_service(
 @account.get("/{account_uuid}/availability")
 async def get_availability(
     account_uuid: str,
-    availability_request: schemas.AvailabilityRequest,
+    availability_request: schemas.AvailabilityRequest = Depends(),
     db: Session = Depends(get_db)
 ):
 
     existing_appointments = crud.get_all_appointments_between(
-        db, availability_request.start_date, availability_request.end_date
+        db, availability_request.start_date, availability_request.end_date, account_uuid
     )
 
     START_HOUR = 8
-    END_HOUR = 17
+    END_HOUR = 12
     INTERVAL = 30
 
     # generate all possible time slots
     timeslots = []
+    dates = []
+
+    service = crud.get_service_by_uuid(db, availability_request.service_uuid)
 
     for day in range((availability_request.end_date - availability_request.start_date).days + 1):
         date = availability_request.start_date + datetime.timedelta(days=day)
         date_time = datetime.datetime(date.year, date.month, date.day).replace(tzinfo=pytz.UTC)
+        dates.append(date)
         for hour in range(START_HOUR, END_HOUR):
             for minute in range(0, 60, INTERVAL):
                 timeslots.append(
                     {
                         'start': date_time.replace(hour=hour, minute=minute),
-                        'end': date_time.replace(hour=hour, minute=minute) + datetime.timedelta(minutes=INTERVAL)
+                        'end': date_time.replace(hour=hour, minute=minute) + datetime.timedelta(minutes=service.duration)
                     }
                 )
 
@@ -77,5 +81,7 @@ async def get_availability(
                 timeslots.remove(timeslot)
 
     return {
-        '2023-03-17': timeslots
+        date:
+            [start_end_dates for start_end_dates in timeslots if start_end_dates['start'].date() == date]
+        for date in dates
     }
