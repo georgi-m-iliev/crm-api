@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 from pydantic import BaseModel, EmailStr
 
@@ -63,11 +64,15 @@ class ServiceCreate(ServiceBase):
 
 
 class Service(ServiceBase):
-    uuid: str
-    is_active: bool
+    uuid: str | None
+    # is_active: bool
 
     class Config:
         from_attributes = True
+
+
+class ServicesCreate(BaseModel):
+    services: list[ServiceCreate]
 
 
 class AppointmentBase(BaseModel):
@@ -98,3 +103,11 @@ class AvailabilityRequest(BaseModel):
 class AppointmentsBetweenRequest(BaseModel):
     start_date: datetime.datetime
     end_date: datetime.datetime
+
+
+class ServiceUpdate(ServiceBase):
+    uuid: str
+
+
+class ServicesUpdate(BaseModel):
+    services: List[ServiceUpdate]

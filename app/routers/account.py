@@ -27,15 +27,15 @@ async def read_services(
     return crud.get_services_by_account_uuid(db, account_uuid)
 
 
-@account.post("/{account_uuid}/services/add", response_model=schemas.Service)
+@account.patch("/{account_uuid}/services", response_model=schemas.Service)
 async def create_service(
     account_uuid: str,
-    service: schemas.ServiceCreate,
+    update: list[schemas.ServiceUpdate],
     user: models.User = Depends(get_user_and_check_account),
     db: Session = Depends(get_db)
 ):
-    return crud.create_service(db, service, account_uuid)
-
+    # return crud.update_services(db, update, account_uuid)
+    return 200
 
 
 @account.get("/{account_uuid}/availability")

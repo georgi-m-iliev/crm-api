@@ -30,12 +30,21 @@ def get_services_by_account_uuid(db: Session, account_uuid: str):
     return db.query(models.Account).filter(models.Account.uuid == account_uuid).first().services
 
 
-def create_service(db: Session, service_data: schemas.ServiceCreate, account_uuid: str):
-    service = models.Service(**service_data.dict(), account_uuid=account_uuid)
-    db.add(service)
+def update_services(db: Session, update: schemas.ServicesUpdate, account_uuid: str):
+    # update consists of a list of services - some are existing, some are new and have no uuid
+    # we need to remove the services that are not in the update list and add the new ones
+    existing_services = db.query(models.Service).filter(models.Service.account_uuid == account_uuid).all()
+    existing_services_uuids = [service.uuid for service in existing_services]
+    keep_services_uuids = [service.uuid for service in update.services if service.uuid is not None]
+    new_services = [service for service in update.services if service.uuid is None]
+    for service in new_services:
+        db.add(models.Service(**service.dict(), account_uuid=account_uuid))
     db.commit()
-    db.refresh(service)
-    return service
+    to_delete_uuids = [uuid for uuid in existing_services_uuids if uuid not in keep_services_uuids]
+    for uuid in to_delete_uuids:
+        db.query(models.Appointment).filter(models.Appointment.service_uuid == uuid).delete()
+        db.query(models.Service).filter(models.Service.uuid == uuid).delete()
+    db.commit()
 
 
 def get_all_appointments_between(db: Session, start: datetime.datetime, end: datetime.datetime):
