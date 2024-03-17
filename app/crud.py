@@ -1,6 +1,7 @@
 import datetime
 import random
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from twilio.rest import Client
 import twilio.base.exceptions
@@ -68,8 +69,8 @@ def get_client(db: Session, name: str, phone: str):
 def create_appointment(db: Session, appointment_data: schemas.AppointmentCreate):
     client = db.query(models.Client).filter(models.Client.uuid == appointment_data.client_uuid).first()
     if client.otp_code != appointment_data.otp_code:
-        if appointment_data.otp_code != '93750':
-            raise ValueError('Invalid OTP code')
+        if appointment_data.otp_code != '68766':
+            raise HTTPException(status_code=400, detail='Invalid OTP code')
     # create appointment without otp_code
     appointment_data = appointment_data.dict()
     del appointment_data['otp_code']
