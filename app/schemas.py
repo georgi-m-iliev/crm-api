@@ -107,3 +107,24 @@ class AppointmentsBetweenRequest(BaseModel):
 
 class ServicesUpdate(BaseModel):
     services: List[Service]
+
+
+class AutomationBase(BaseModel):
+    name: str
+    type: str
+    description: str
+    is_active: bool
+    message: str
+    status: str
+
+
+class AutomationCreate(AutomationBase):
+    pass
+
+
+class Automation(AutomationBase):
+    uuid: str
+    account_uuid: str
+
+    class Config:
+        from_attributes = True

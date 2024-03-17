@@ -57,3 +57,25 @@ class Appointment(Base):
     client = relationship("Client", backref="clients")
     service = relationship("Service", backref="services.uuid")
 
+
+class Automation(Base):
+    __tablename__ = "automations"
+
+    uuid = Column(String, primary_key=True, server_default=func.gen_random_uuid())
+    account_uuid = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    is_active = Column(Boolean, default=False)
+    message = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+
+
+class AutomationEvent(Base):
+    __tablename__ = "automations_events"
+
+    uuid = Column(String, primary_key=True, server_default=func.gen_random_uuid())
+    automation_uuid = Column(String, ForeignKey("automations.account_uuid"))
+    schedule_time = Column(Time(timezone=True), nullable=False)
+    client_uuid = Column(String, ForeignKey("clients.uuid"))
+    message = Column(String, nullable=False)

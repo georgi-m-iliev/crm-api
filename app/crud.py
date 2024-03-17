@@ -118,3 +118,27 @@ def get_appointments_between(db: Session, account_uuid: str, appointments_reques
     return [item for item in db.query(models.Appointment).filter(
         models.Appointment.date.between(appointments_request.start_date, appointments_request.end_date)
     ).all() if item.service.account_uuid == account_uuid]
+
+
+def create_automation(db: Session, automation: schemas.AutomationCreate):
+    db.add(models.Automation(**automation.dict()))
+    db.commit()
+    return automation
+
+
+def get_automations_by_account_uuid(db: Session, account_uuid: str):
+    return db.query(models.Automation).filter(models.Automation.account_uuid == account_uuid).all()
+
+
+def enable_automation(db: Session, automation_uuid: str):
+    automation = db.query(models.Automation).filter(models.Automation.uuid == automation_uuid).first()
+    automation.enabled = True
+    db.commit()
+    return automation
+
+
+def disable_automation(db: Session, automation_uuid: str):
+    automation = db.query(models.Automation).filter(models.Automation.uuid == automation_uuid).first()
+    automation.enabled = False
+    db.commit()
+    return automation
