@@ -91,8 +91,8 @@ class Appointment(AppointmentBase):
 
 class AvailabilityRequest(BaseModel):
     service_uuid: str
-    start_date: datetime.datetime
-    end_date: datetime.datetime
+    start_date: datetime.date
+    end_date: datetime.date
 
 
 class AppointmentsBetweenRequest(BaseModel):

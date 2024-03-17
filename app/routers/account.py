@@ -1,3 +1,6 @@
+import pytz
+import datetime
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -34,6 +37,7 @@ async def create_service(
     return crud.create_service(db, service, account_uuid)
 
 
+
 @account.get("/{account_uuid}/availability")
 async def get_availability(
     account_uuid: str,
@@ -45,27 +49,33 @@ async def get_availability(
         db, availability_request.start_date, availability_request.end_date
     )
 
-    print(existing_appointments)
-    print(existing_appointments[0].client.name)
-    print(existing_appointments[0].service.duration)
+    START_HOUR = 8
+    END_HOUR = 17
+    INTERVAL = 30
+
+    # generate all possible time slots
+    timeslots = []
+
+    for day in range((availability_request.end_date - availability_request.start_date).days + 1):
+        date = availability_request.start_date + datetime.timedelta(days=day)
+        date_time = datetime.datetime(date.year, date.month, date.day).replace(tzinfo=pytz.UTC)
+        for hour in range(START_HOUR, END_HOUR):
+            for minute in range(0, 60, INTERVAL):
+                timeslots.append(
+                    {
+                        'start': date_time.replace(hour=hour, minute=minute),
+                        'end': date_time.replace(hour=hour, minute=minute) + datetime.timedelta(minutes=INTERVAL)
+                    }
+                )
+
+    for appointment in existing_appointments:
+        appointment_start = appointment.date
+        appointment_end = appointment.date + datetime.timedelta(minutes=appointment.service.duration)
+        for timeslot in timeslots:
+            if timeslot['start'] <= appointment_start < timeslot['end'] \
+                    or timeslot['start'] < appointment_end <= timeslot['end']:
+                timeslots.remove(timeslot)
 
     return {
-        '2023-03-17': [
-            {
-                'start': '2023-03-17 09:00:00',
-                'end': '2023-03-17 9:30:00'
-            },
-            {
-                'start': '2023-03-17 10:00:00',
-                'end': '2023-03-17 10:30:00'
-            },
-            {
-                'start': '2023-03-17 13:00:00',
-                'end': '2023-03-17 13:30:00'
-            },
-            {
-                'start': '2023-03-17 15:00:00',
-                'end': '2023-03-17 15:30:00'
-            }
-        ]
+        '2023-03-17': timeslots
     }
